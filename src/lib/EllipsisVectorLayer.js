@@ -1,12 +1,21 @@
 "use strict"
 
+class Test {
+    constructor (test) {
+        this.test = test;
+    }
+}
+
 class EllipsisVectorLayer {
     constructor(Graphic, GraphicsLayer, blockId, layerId, onFeatureClick, token, styleId, style,
     filter, centerPoints, maxZoom, pageSize, maxMbPerTile, maxTilesInCache, maxFeaturesPerTile,
     radius, lineWidth, useMarkers, loadAll) {
 
         //Make this an instance of a GraphicsLayer
-        GraphicsLayer.call(this);
+        // console.log('a');
+        Test.call(this, 'hi');
+        // GraphicsLayer.constructor.call(this, 'hello world');
+        console.log(this.test);
 
         //Passed RequireJS import
         this.Graphic = Graphic;

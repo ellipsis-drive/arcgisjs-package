@@ -6,9 +6,8 @@ const asyncRequire = (imports) => new Promise((res) => {
 });
 
 async function init() {
-    const [esriConfig, Map, MapView, Ellipsis] = await asyncRequire(['esri/config', 'esri/Map', 'esri/views/MapView', 'esri/layers/WMSLayer', '../lib/Ellipsis.js']);
+    const [esriConfig, Map, MapView, Ellipsis] = await asyncRequire(['esri/config', 'esri/Map', 'esri/views/MapView', '../lib/Ellipsis.js']);
     [esriConfig.apiKey] = await asyncRequire(['../../token.js']);
-
     const map = new Map({
         basemap: "arcgis-topographic" // Basemap layer service
     });
@@ -19,6 +18,17 @@ async function init() {
         zoom: 13, // Zoom level
         container: 'map' // Div element
     });
+    let graphicsLayer = Ellipsis.VectorLayer(
+        '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
+        '45c47c8a-035e-429a-9ace-2dff1956e8d9',
+        { 
+            onFeatureClick: (x) => console.log(x),
+            loadAll: true
+        }
+    );
+
+    // map.add(graphicsLayer);
+
 
 
 }
