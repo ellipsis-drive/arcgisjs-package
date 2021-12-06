@@ -2,7 +2,5 @@ token
 node_modules
 package-lock.json
 token.js
-src/test/dist/main.js
-src/test/dist/node*
-src/test/dist/main.js
-src/test/dist/vendors*
+src/test/dist/*
+!src/test/dist/index.html
