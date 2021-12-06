@@ -1,1 +1,1 @@
-console.log(document.getElementById('map'));
+document.getElementById('map');
