@@ -1,12 +1,15 @@
-class EllipsisRasterLayer {
-    constructor(WMSLayer, blockId, captureId, visualizationId, token) {
-        let url = `${EllipsisApi.apiUrl}/wms/${blockId}/${captureId}/${visualizationId}`;
-        if (token) {
-            url += '?token=' + token;
-        }
+import WMSLayer from '@arcgis/core/layers/WMSLayer';
+import EllipsisApi from "./EllipsisApi";
 
-        WMSLayer.call(this, {
-            url: `https://api.ellipsis-drive.com/v1/wms/${blockId}`
-        });
+//TODO handle captureId and visualizationId.
+
+//This basically is a wrapper around a WMS layer. We can't use a class and extends.
+export default EllipsisRasterLayer = (blockId, captureId, visualizationId, options = {}) => {
+    token = options.token;
+    const getTokenUrlExtension = () => {
+        return token ? `?token=${token}` : '';
     }
+    const url = `${EllipsisApi.apiUrl}/wms/${blockId}${getTokenUrlExtension(token)}`;
+
+    return new WMSLayer({ url });
 }

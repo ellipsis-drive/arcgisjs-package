@@ -78,7 +78,7 @@ async function ellipsisApiManagerFetch(method, url, body, user) {
 }
 
 
-export default EllipsisApi = {
+export default {
     apiUrl: apiUrl,
 
     /**
