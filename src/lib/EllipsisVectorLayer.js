@@ -1,70 +1,39 @@
 "use strict"
 
-class Test {
-    constructor (test) {
-        this.test = test;
-    }
-}
 
-class EllipsisVectorLayer {
-    constructor(Graphic, GraphicsLayer, blockId, layerId, onFeatureClick, token, styleId, style,
+const EllipsisVectorLayer = (Graphics, graphicsLayer, blockId, layerId, onFeatureClick, token, styleId, style,
     filter, centerPoints, maxZoom, pageSize, maxMbPerTile, maxTilesInCache, maxFeaturesPerTile,
-    radius, lineWidth, useMarkers, loadAll) {
+    radius, lineWidth, useMarkers, loadAll) => {
 
-        //Make this an instance of a GraphicsLayer
-        // console.log('a');
-        Test.call(this, 'hi');
-        // GraphicsLayer.constructor.call(this, 'hello world');
-        console.log(this.test);
+    id = `${blockId}_${layerId}`;
+    sourceId = `${this.id}_source`;
 
-        //Passed RequireJS import
-        this.Graphic = Graphic;
+    //TODO add Graphics and graphicsLayer to Ellipsis.js
+    //TODO change references from this.property to property
 
-        this.id = `${blockId}_${layerId}`;
-        this.sourceId = `${this.id}_source`;
-
-        this.blockId = blockId;
-        this.layerId = layerId;
-        this.maxZoom = maxZoom;
-        this.onFeatureClick = onFeatureClick;
-        this.token = token;
-        this.styleId = styleId;
-        this.style = style;
-        this.filter = filter;
-        this.centerPoints = centerPoints;
-        this.pageSize = Math.min(pageSize, 3000);
-        this.maxMbPerTile = maxMbPerTile;
-        this.maxTilesInCache = maxTilesInCache;
-        this.maxFeaturesPerTile = maxFeaturesPerTile;
-        this.radius = radius;
-        this.lineWidth = lineWidth;
-        this.useMarkers = useMarkers;
-        this.loadAll = loadAll;
-
-        this.tiles = [];
-        this.cache = [];
-        this.markers = [];
-        this.zoom = 1;
-        this.changed = false;
-    }
-
+    pageSize = Math.min(pageSize, 3000);
+    tiles = [];
+    cache = [];
+    markers = [];
+    zoom = 1;
+    changed = false;
     /**
      * @returns mapbox geojson source that the layer is using
      */
-    getSource() {
+    getSource = () => {
         return this.source;
     }
 
     /**
      * @returns mapbox layer
      */
-    getLayers() {
+    getLayers = () => {
         if (!this.map) return [];
         if (!this.map.getStyle() || !this.map.getStyle().layers) return [];
         return this.map.getStyle().layers.filter(x => x.id.startsWith(this.id));
     }
 
-    addTo(map) {
+    addTo = (map) => {
         this.map = map;
 
         map.addSource(this.sourceId, {
@@ -424,6 +393,9 @@ class EllipsisVectorLayer {
         return { bounds: bounds, zoom: parseInt(zoom + 1, 10) };
     };
 
+    return graphicsLayer;
 }
+
+
 
 window.EllipsisVectorLayer = EllipsisVectorLayer;

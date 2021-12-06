@@ -17,7 +17,6 @@ define(['esri/layers/WMSLayer', 'esri/Graphic', 'esri/layers/GraphicsLayer'], (W
         },
         VectorLayer: (blockId, layerId, options = {}) => {
             return new EllipsisVectorLayer(
-                Graphic, MyCustomGraphicsLayer,
                 blockId, layerId,
                 options.onFeatureClick,
                 options.token,
