@@ -3,3 +3,5 @@ node_modules
 package-lock.json
 token.js
 src/test/dist/main.js
+src/test/dist/node*
+src/test/dist/main.js
