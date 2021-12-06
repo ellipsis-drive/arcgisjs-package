@@ -15,7 +15,7 @@
   \***************************/
 /***/ (() => {
 
-eval("document.getElementById('map').innerText('Hello world');\n\n//# sourceURL=webpack://src/./src/test/index.js?");
+eval("console.log(document.getElementById('map'));\n\n//# sourceURL=webpack://src/./src/test/index.js?");
 
 /***/ })
 

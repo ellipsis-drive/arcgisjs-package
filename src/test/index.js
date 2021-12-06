@@ -1,1 +1,1 @@
-document.getElementById('map').innerText('Hello world');
+console.log(document.getElementById('map'));
