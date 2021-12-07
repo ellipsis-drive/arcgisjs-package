@@ -1,3 +1,5 @@
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import Graphic from '@arcgis/core/Graphic';
 import EllipsisApi from "./EllipsisApi";
 
 const defaultOptions = {
@@ -11,34 +13,31 @@ const defaultOptions = {
     lineWidth: 5,
     useMarkers: false,
     loadAll: false
-}
+};
 
 const optionModifiers = {
     pageSize: (pageSize) => Math.max(3000, pageSize),
     maxMbPerTile: (maxMbPerTile) => maxMbPerTile * 1000000
-}
+};
 
-export default EllipsisVectorLayer = (blockId, layerId, options = {}) => {
+const EllipsisVectorLayer = (blockId, layerId, options = {}) => {
 
-    const setDefaultOptions = (defaults) => {
-        Object.keys(defaults).forEach(x => {
-            if (options[x] == undefined)
-                options[x] = defaults[x];
-        })
-    }
-    const applyOptionModifiers = (modifiers) => {
-        Object.keys(modifiers).forEach(x => {
-            options[x] = modifiers[x](x);
-        })
-    }
-    setDefaultOptions(defaultOptions);
-    applyOptionModifiers(optionModifiers);
+    Object.keys(defaultOptions).forEach(x => {
+        if (options[x] == undefined)
+            options[x] = defaultOptions[x];
+    });
+    Object.keys(optionModifiers).forEach(x => {
+        options[x] = optionModifiers[x](x);
+    });
+    let tiles = [];
+    let cache = [];
+    let markers = [];
+    let zoom = 1;
+    let changed = false;
 
-    tiles = [];
-    cache = [];
-    markers = [];
-    zoom = 1;
-    changed = false;
+    let graphicsLayer = new GraphicsLayer();
+    graphicsLayer.on('scale-range-change', () => console.log('scale range change'));
+    return graphicsLayer;
 
     //   options.onFeatureClick,
     //options.token,
@@ -55,8 +54,9 @@ export default EllipsisVectorLayer = (blockId, layerId, options = {}) => {
     // options.lineWidth = options.lineWidth ? options.lineWidth : 5;
     // options.useMarkers = options.useMarkers ? true : false;
     // options.loadAll = options.loadAll ? true : false;
-
 }
+
+export default EllipsisVectorLayer;
 
 // export default class EllipsisVectorLayer {
 //     constructor(blockId, layerId, onFeatureClick, token, styleId, style,
