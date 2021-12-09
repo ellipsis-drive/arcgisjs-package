@@ -4,3 +4,4 @@ package-lock.json
 token.js
 src/test/dist/*
 !src/test/dist/index.html
+temp*
