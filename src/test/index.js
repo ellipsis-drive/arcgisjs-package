@@ -19,7 +19,7 @@ const map = new Map({
 
 const view = new MapView({
     map: map,
-    center: [-118.805, 34.027], // Longitude, latitude
+    center: [4.633205849096186, 52.373527706597514], // Longitude, latitude
     zoom: 13, // Zoom level
     container: "map", // Div element
 });
@@ -87,5 +87,5 @@ const view = new MapView({
 //     '2057fd2a-66c5-46ef-9c71-bb8f7a180c44',
 //     ''
 // ), 0);
-
-map.add(Ellipsis.VectorLayer(view, '1a24a1ee-7f39-4d21-b149-88df5a3b633a','45c47c8a-035e-429a-9ace-2dff1956e8d9'), 1);
+const layer = Ellipsis.VectorLayer(view, '1a24a1ee-7f39-4d21-b149-88df5a3b633a','45c47c8a-035e-429a-9ace-2dff1956e8d9', {styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'});
+map.add(layer,1);

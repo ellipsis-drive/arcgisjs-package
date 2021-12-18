@@ -38,10 +38,7 @@ class EllipsisVectorLayer {
 
         //We cannot use GeoJsonLayer because it only accepts one geometry type.
         this.graphicsLayer = new GraphicsLayer();
-            // spatialReference: {
-            //     wkid: 4326
-            // }
-        
+
         this.latLngNotationType = new SpatialReference({
             wkid: 4326
         });
@@ -50,6 +47,7 @@ class EllipsisVectorLayer {
         view.watch("stationary", async () => {
             await this.handleViewportUpdate();
         });
+        this.handleViewportUpdate();
     }
 
     handleViewportUpdate = async () => {
@@ -85,12 +83,30 @@ class EllipsisVectorLayer {
             });
         }
 
+        if(!features.length) return;        
         
-        // if (!this.printedFeatureIds.length)
-        //     this.clearLayers();
-        // this.addData(features.filter(x => !this.printedFeatureIds.includes(x.properties.id)));
-        // features.forEach(x => this.printedFeatureIds.push(x.properties.id));
-        console.log(features);
+        this.graphicsLayer.removeAll();
+        this.graphicsLayer.addMany(features.flatMap(x => {
+            if(x.geometry.needsMultipleGraphics) {
+                //We could translate this all into a array.map
+                let parts = []; 
+                for(let i = 0; i < x.geometry.rings.length; i++) {
+                    const geometryPart = {...x.geometry};
+                    geometryPart.rings = geometryPart.rings[i];
+                    parts.push(new Graphic({
+                        id: x.properties.id,
+                        geometry: geometryPart,
+                        symbol: x.symbol
+                    }));
+                }
+                return parts;
+            }
+            return new Graphic({
+                id: x.properties.id,
+                geometry: x.geometry,
+                symbol: x.symbol
+            })
+        }));        
     };
 
     loadStep = async () => {
@@ -123,7 +139,7 @@ class EllipsisVectorLayer {
     getAndCacheAllGeoJsons = async () => {
         if (this.nextPageStart === 4)
             return false;
-
+        
         const body = {
             pageStart: this.nextPageStart,
             mapId: this.blockId,
@@ -142,7 +158,7 @@ class EllipsisVectorLayer {
                 this.nextPageStart = 4; //EOT (end of transmission)
             if (res.result && res.result.features) {
                 res.result.features.forEach(x => {
-                    this.styleGeoJson(x, this.lineWidth, this.radius);
+                    this.formatGeoJson(x);
                     this.cache.push(x);
                 });
             }
@@ -164,7 +180,6 @@ class EllipsisVectorLayer {
 
             const pageStart = this.cache[tileId].nextPageStart;
 
-            //TODO in other packages we use < instead of <=
             //Check if tile is not already fully loaded, and if more features may be loaded
             if (pageStart && this.cache[tileId].amount <= this.maxFeaturesPerTile && this.cache[tileId].size <= this.maxMbPerTile)
                 return { tileId: t, pageStart }
@@ -219,7 +234,7 @@ class EllipsisVectorLayer {
             tileData.size = tileData.size + result[j].size;
             tileData.amount = tileData.amount + result[j].result.features.length;
             tileData.nextPageStart = result[j].nextPageStart;
-            result[j].result.features.forEach(x => this.styleGeoJson(x, this.lineWidth, this.radius));
+            result[j].result.features.forEach(x => this.formatGeoJson(x));
             tileData.elements = tileData.elements.concat(result[j].result.features);
 
         }
@@ -228,72 +243,66 @@ class EllipsisVectorLayer {
 
     getTileId = (tile) => `${tile.zoom}_${tile.tileX}_${tile.tileY}`;
 
-    styleGeoJson = (geoJson, weight, radius) => {
-        if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
+    // styleGeoJson = (geoJson, weight, radius) => {
+    //     if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
 
-        const type = geoJson.geometry.type;
-        const properties = geoJson.properties;
-        const color = properties.color;
-        const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
+    //     const type = geoJson.geometry.type;
+    //     const properties = geoJson.properties;
+    //     const color = properties.color;
+    //     const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
 
-        //Parse color and opacity
-        if (isHexColorFormat && color.length === 9) {
-            properties.fillOpacity = parseInt(color.substring(8, 10), 16) / 25.5;
-            properties.color = color.substring(0, 7);
-        }
-        else {
-            properties.fillOpacity = 0.6;
-            properties.color = color;
-        }
+    //     //Parse color and opacity
+    //     if (isHexColorFormat && color.length === 9) {
+    //         properties.fillOpacity = parseInt(color.substring(8, 10), 16) / 25.5;
+    //         properties.color = color.substring(0, 7);
+    //     }
+    //     else {
+    //         properties.fillOpacity = 0.6;
+    //         properties.color = color;
+    //     }
 
-        //Parse line width
-        if (type.endsWith('Point')) {
-            properties.radius = radius;
-            properties.weight = 2;
-        }
-        else properties.weight = weight;
-    }
+    //     //Parse line width
+    //     if (type.endsWith('Point')) {
+    //         properties.radius = radius;
+    //         properties.weight = 2;
+    //     }
+    //     else properties.weight = weight;
+    // }
 
+    //Format geo json so the data can be used directly in a Graphic.
     formatGeoJson = (geoJson) => {
         if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
         const type = geoJson.geometry.type;
         const properties = geoJson.properties;
         const color = properties.color;
-        const splitHexComponents = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(color);
-        if(!splitHexComponents) return;
-        let [r,g,b,a] = splitHexComponents.slice(1).map(x => parseInt(x, 16));
-        a = isNaN(a) ? a = 0.5 : a /= 25.5;
-        if(isNaN(a)) a = 25.5;
 
+        let r = 1, g = 1, b = 1, a = 0.25; //default to black, with 25% opacity
+        if(color) {
+            const splitHexComponents = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(color);
+            if(!splitHexComponents) return;
+            [r,g,b,a] = splitHexComponents.slice(1).map(x => parseInt(x, 16));
+            a = isNaN(a) ? a = 0.5 : a /= 255;
+            if(isNaN(a)) a = 0.25;
+        }
+
+        
+        //TODO look if this isn't better to do in the render function..
         if(type.endsWith('Polygon')) {
+            if(type.startsWith('Multi'))
+                geoJson.geometry.needsMultipleGraphics = true;
+            
             geoJson.geometry.type = 'polygon';
             geoJson.geometry.rings = geoJson.geometry.coordinates;
-            delete geoJson.geometry.coordinates;
 
             geoJson.symbol = {
-                color: [r, g, b, a/100],  // Orange, opacity 80%
+                type: 'simple-fill',
+                color: [r, g, b, a],
                 outline: {
                     color: [r, g, b],
                     width: this.lineWidth
                 }
             }
         }
-
-
-
-    }
-
-    getGraphic = (geoJsonFeature) => {
-        // geometry:
-            // coordinates: [Array(14)]
-            // type: "Polygon"
-        // properties:
-            // color: "#fb2de5"
-            // fillOpacity: 0.3137254901960784
-            // id: "094512ee-11d3-4019-997f-73ea96590557"
-            // userId: "9113af2b-943f-4689-b5f4-e575167d5a38"
-            // weight: 5
-        
     }
 
     boundsToTiles = (bounds, zoom) => {
@@ -361,7 +370,7 @@ EllipsisVectorLayer.defaultOptions = {
     maxTilesInCache: 500,
     maxFeaturesPerTile: 200,
     radius: 15,
-    lineWidth: 5,
+    lineWidth: 2,
     useMarkers: false,
     loadAll: false
 };

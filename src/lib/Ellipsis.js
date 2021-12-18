@@ -5,5 +5,5 @@ export default {
     RasterLayer: EllipsisRasterLayer,
 
     //use parasitic inheritance because we cannot extend the requireJS GraphicsLayer, and because we have to maintain a paired state
-    VectorLayer: (...args) => new EllipsisVectorLayer(...args).graphicsLayer 
+    VectorLayer: (...args) => new EllipsisVectorLayer(...args).graphicsLayer
 };
