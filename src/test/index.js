@@ -35,14 +35,14 @@ const view = new MapView({
 //     console.log(e);
 // });
 
-view.watch("scale", (e, f) => {
-    console.log("scale chage");
-    console.log(e);
-});
+// view.watch("scale", (e, f) => {
+//     console.log("scale chage");
+//     console.log(e);
+// });
 
-view.watch("stationary", (e) => {
-    console.log(`stationary: ${e}`);
-})
+// view.watch("stationary", (e) => {
+//     console.log(`stationary: ${e}`);
+// })
 
 // const sr4326 = new SpatialReference({
 //     wkid: 4326

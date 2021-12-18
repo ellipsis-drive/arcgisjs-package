@@ -14,9 +14,9 @@ class EllipsisVectorLayer {
                 options[x] = EllipsisVectorLayer.defaultOptions[x];
         });
         Object.keys(EllipsisVectorLayer.optionModifiers).forEach(x => {
-            options[x] = EllipsisVectorLayer.optionModifiers[x](x);
+            options[x] = EllipsisVectorLayer.optionModifiers[x](options[x]);
         });
-        
+        console.log(options);
         //Copy options to this context. TODO find out or ask if this can be harmful. TODO best to wrap everything in options object anyways.
         Object.keys(options).forEach(x => {
             //Make sure the user can't overwrite anything by accident.
@@ -45,18 +45,19 @@ class EllipsisVectorLayer {
 
         //Handle panning of the map
         view.watch("stationary", (isStationary) => {
-            if(!isStationary && !this.viewportCheckingInterval) {
-                this.handleViewportUpdate();
-                this.viewportCheckingInterval = setInterval(() => {
-                    this.handleViewportUpdate();
-                }, 1000);
-            } else if(isStationary) {
-                this.handleViewportUpdate();
-                if(this.viewportCheckingInterval) {
-                    clearInterval(this.viewportCheckingInterval);
-                    this.viewportCheckingInterval = undefined;
-                }
-            }
+            // if(!isStationary && !this.viewportCheckingInterval) {
+            //     this.handleViewportUpdate();
+            //     this.viewportCheckingInterval = setInterval(() => {
+            //         this.handleViewportUpdate();
+            //     }, 1000);
+            // } else if(isStationary) {
+            //     this.handleViewportUpdate();
+            //     if(this.viewportCheckingInterval) {
+            //         clearInterval(this.viewportCheckingInterval);
+            //         this.viewportCheckingInterval = undefined;
+            //     }
+            // }
+            if(isStationary) this.handleViewportUpdate();
         });
 
         //Handle feature clicks
@@ -80,12 +81,12 @@ class EllipsisVectorLayer {
                 }
             });
         }
-        projection.load();
-        this.handleViewportUpdate();
+        projection.load().then(this.handleViewportUpdate());
     }
 
     handleViewportUpdate = async () => {
         const viewport = await this.getMapBounds();
+        console.log(viewport.zoom);
         if (!viewport) return;
         this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
         this.tiles = this.boundsToTiles(viewport.bounds, this.zoom);
@@ -119,28 +120,79 @@ class EllipsisVectorLayer {
         if(!features.length) return;        
         
         this.graphicsLayer.removeAll();
-        this.graphicsLayer.addMany(features.flatMap(x => {
-            if(x.geometry.needsMultipleGraphics) {
-                //Create multiple graphics if for example a polygon has multiple rings.
-                let parts = []; 
-                for(let i = 0; i < x.geometry.rings.length; i++) {
-                    const geometryPart = {...x.geometry};
-                    geometryPart.rings = geometryPart.rings[i];
-                    parts.push(new Graphic({
-                        id: x.properties.id,
-                        geometry: geometryPart,
-                        symbol: x.symbol
-                    }));
-                }
-                return parts;
-            }
-            return new Graphic({
-                id: x.properties.id,
-                geometry: x.geometry,
-                symbol: x.symbol
-            })
-        }));        
+        this.graphicsLayer.addMany(features.flatMap(x => this.featureToGraphics(x)));        
     };
+
+    featureToGraphics = (feature) => {
+        const type = feature.geometry.type;
+        const properties = feature.properties;
+        const color = properties.color;
+
+        let r = 1, g = 1, b = 1, a = 0.25; //default to black, with 25% opacity
+        if(color) {
+            const splitHexComponents = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(color);
+            if(!splitHexComponents) return;
+            [r,g,b,a] = splitHexComponents.slice(1).map(x => parseInt(x, 16));
+            a = isNaN(a) ? a = 0.5 : a /= 255;
+            if(isNaN(a)) a = 0.25;
+        }
+        const coordinateArray = type.startsWith('Multi') ? feature.geometry.coordinates : [feature.geometry.coordinates];
+
+        if(type.endsWith('Polygon')) {
+            const symbol = {
+                type: 'simple-fill',
+                color: [r, g, b, a],
+                outline: {
+                    color: [r, g, b],
+                    width: this.lineWidth
+                }
+            }
+            //Multipolygons need to be added as seperate shapes
+            return coordinateArray.map(path => new Graphic({
+                id: feature.properties.id,
+                symbol,
+                geometry: {
+                    type: 'polygon',
+                    rings: path,
+                }
+            }));
+        }
+        if(type.endsWith('Point')) {
+            const symbol = {
+                type: 'simple-marker',
+                color: [r, g, b, a],
+                size: this.radius,
+                outline: {
+                    width: this.lineWidth,
+                    color: [r, g, b]
+                }
+            }
+            return coordinateArray.map(point => new Graphic({
+                id: feature.properties.id,
+                symbol,
+                geometry: {
+                    type: 'point',
+                    longitude: point[0],
+                    latitude: point[1],
+                }
+            }));
+        }
+        if(type.endsWith('Line')) {
+            const symbol = {
+                type: 'simple-line',
+                color: [r, g, b, a],
+                width: this.lineWidth,
+            }
+            return coordinateArray.map(path => new Graphic({
+                id: feature.properties.id,
+                symbol,
+                geometry: {
+                    type: 'polyline',
+                    paths: path,
+                }
+            }));
+        }
+    }
 
     loadStep = async () => {
         this.isLoading = true;
@@ -191,7 +243,6 @@ class EllipsisVectorLayer {
                 this.nextPageStart = 4; //EOT (end of transmission)
             if (res.result && res.result.features) {
                 res.result.features.forEach(x => {
-                    this.formatGeoJson(x);
                     this.cache.push(x);
                 });
             }
@@ -213,22 +264,34 @@ class EllipsisVectorLayer {
 
             const pageStart = this.cache[tileId].nextPageStart;
 
+            if(pageStart) console.log('yeahhh we have a next page start');
+
             //Check if tile is not already fully loaded, and if more features may be loaded
             if (pageStart && this.cache[tileId].amount <= this.maxFeaturesPerTile && this.cache[tileId].size <= this.maxMbPerTile)
                 return { tileId: t, pageStart }
-
+            if(this.cache[tileId].amount > this.maxFeaturesPerTile)
+                console.log(`tile reached max features: ${this.cache[tileId].amount}/${this.maxFeaturesPerTile}`);
+            if(this.cache[tileId].size > this.maxMbPerTile)
+                console.log(`tile reached max mb: ${this.cache[tileId].size}/${this.maxMbPerTile}`);
+            if(!pageStart)
+                console.log(`no pagestart..`);
+            
             return null;
         }).filter(x => x);
 
+        console.log(`There are ${this.tiles.length} tiles in the map!`);
 
-        if (tiles.length === 0) return false;
+        if (tiles.length === 0) {
+            console.log('there are no tiles left to render');
+            return false;
+        }
 
         const body = {
             mapId: this.blockId,
             returnType: this.centerPoints ? "center" : "geometry",
             layerId: this.layerId,
             zip: true,
-            pageSize: Math.min(3000, this.pageSize),
+            pageSize: this.pageSize,
             styleId: this.styleId,
             style: this.style,
             propertyFilter: (this.filter && this.filter > 0) ? this.filter : null,
@@ -267,7 +330,6 @@ class EllipsisVectorLayer {
             tileData.size = tileData.size + result[j].size;
             tileData.amount = tileData.amount + result[j].result.features.length;
             tileData.nextPageStart = result[j].nextPageStart;
-            result[j].result.features.forEach(x => this.formatGeoJson(x));
             tileData.elements = tileData.elements.concat(result[j].result.features);
 
         }
@@ -275,68 +337,6 @@ class EllipsisVectorLayer {
     };
 
     getTileId = (tile) => `${tile.zoom}_${tile.tileX}_${tile.tileY}`;
-
-    // styleGeoJson = (geoJson, weight, radius) => {
-    //     if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
-
-    //     const type = geoJson.geometry.type;
-    //     const properties = geoJson.properties;
-    //     const color = properties.color;
-    //     const isHexColorFormat = /^#?([A-Fa-f0-9]{2}){3,4}$/.test(color);
-
-    //     //Parse color and opacity
-    //     if (isHexColorFormat && color.length === 9) {
-    //         properties.fillOpacity = parseInt(color.substring(8, 10), 16) / 25.5;
-    //         properties.color = color.substring(0, 7);
-    //     }
-    //     else {
-    //         properties.fillOpacity = 0.6;
-    //         properties.color = color;
-    //     }
-
-    //     //Parse line width
-    //     if (type.endsWith('Point')) {
-    //         properties.radius = radius;
-    //         properties.weight = 2;
-    //     }
-    //     else properties.weight = weight;
-    // }
-
-    //Format geo json so the data can be used directly in a Graphic.
-    formatGeoJson = (geoJson) => {
-        if (!geoJson || !geoJson.geometry || !geoJson.geometry.type || !geoJson.properties) return;
-        const type = geoJson.geometry.type;
-        const properties = geoJson.properties;
-        const color = properties.color;
-
-        let r = 1, g = 1, b = 1, a = 0.25; //default to black, with 25% opacity
-        if(color) {
-            const splitHexComponents = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(color);
-            if(!splitHexComponents) return;
-            [r,g,b,a] = splitHexComponents.slice(1).map(x => parseInt(x, 16));
-            a = isNaN(a) ? a = 0.5 : a /= 255;
-            if(isNaN(a)) a = 0.25;
-        }
-
-        
-        //TODO look if this isn't better to do in the render function..
-        if(type.endsWith('Polygon')) {
-            if(type.startsWith('Multi'))
-                geoJson.geometry.needsMultipleGraphics = true;
-            
-            geoJson.geometry.type = 'polygon';
-            geoJson.geometry.rings = geoJson.geometry.coordinates;
-
-            geoJson.symbol = {
-                type: 'simple-fill',
-                color: [r, g, b, a],
-                outline: {
-                    color: [r, g, b],
-                    width: this.lineWidth
-                }
-            }
-        }
-    }
 
     boundsToTiles = (bounds, zoom) => {
         const xMin = Math.max(bounds.xMin, -180);
@@ -381,7 +381,6 @@ class EllipsisVectorLayer {
     getMapBounds = () => {
         if(!projection.isLoaded()) return undefined;
 
-
         const arcgisBounds = projection.project(this.view.extent, this.latLngNotationType);
 
         let bounds = {
@@ -390,6 +389,8 @@ class EllipsisVectorLayer {
             yMin: arcgisBounds.ymin,
             yMax: arcgisBounds.ymax,
         };
+
+        console.log(JSON.stringify(bounds));
 
         return { bounds: bounds, zoom: Math.round(this.view.zoom)};
     };
@@ -403,15 +404,15 @@ EllipsisVectorLayer.defaultOptions = {
     pageSize: 25,
     maxMbPerTile: 16,
     maxTilesInCache: 500,
-    maxFeaturesPerTile: 200,
-    radius: 15,
-    lineWidth: 2,
+    maxFeaturesPerTile: 500,
+    radius: 6,
+    lineWidth: 2, //TODO also change in readme
     useMarkers: false,
     loadAll: false
 };
 
 EllipsisVectorLayer.optionModifiers = {
-    pageSize: (pageSize) => Math.max(3000, pageSize),
+    pageSize: (pageSize) => Math.min(3000, pageSize),
     maxMbPerTile: (maxMbPerTile) => maxMbPerTile * 1000000
 }; 
 
