@@ -43,10 +43,44 @@ class EllipsisVectorLayer {
             wkid: 4326
         });
 
-        //TODO check if we can also do this faster
-        view.watch("stationary", async () => {
-            await this.handleViewportUpdate();
+        //Handle panning of the map
+        view.watch("stationary", (isStationary) => {
+            if(!isStationary && !this.viewportCheckingInterval) {
+                this.handleViewportUpdate();
+                this.viewportCheckingInterval = setInterval(() => {
+                    this.handleViewportUpdate();
+                }, 1000);
+            } else if(isStationary) {
+                this.handleViewportUpdate();
+                if(this.viewportCheckingInterval) {
+                    clearInterval(this.viewportCheckingInterval);
+                    this.viewportCheckingInterval = undefined;
+                }
+            }
         });
+
+        //Handle feature clicks
+        if(this.onFeatureClick) {
+            view.on("click", async (e) => {
+                const hit = await view.hitTest({x: e.x, y: e.y});
+                if(!hit.results || !hit.results.length) return;
+                const graphicHit = hit.results.find(x => x.graphic.layer === this.graphicsLayer);
+                const graphic = graphicHit.graphic;
+                if(graphic && graphic.id) {
+                    let feature;
+                    if (this.loadAll) {
+                        feature = this.cache.find(x => x.properties.id === graphic.id);
+                    } else {
+                        feature = this.tiles.flatMap((t) => {
+                            const geoTile = this.cache[this.getTileId(t)];
+                            return geoTile ? geoTile.elements : [];
+                        }).find(x => x.properties.id === graphic.id);
+                    }
+                    this.onFeatureClick(feature, graphicHit, e);
+                }
+            });
+        }
+        projection.load();
         this.handleViewportUpdate();
     }
 
@@ -56,7 +90,6 @@ class EllipsisVectorLayer {
         this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
         this.tiles = this.boundsToTiles(viewport.bounds, this.zoom);
         if (this.gettingVectorsInterval) return;
-
         this.gettingVectorsInterval = setInterval(async () => {
             if (this.isLoading) return;
 
@@ -88,7 +121,7 @@ class EllipsisVectorLayer {
         this.graphicsLayer.removeAll();
         this.graphicsLayer.addMany(features.flatMap(x => {
             if(x.geometry.needsMultipleGraphics) {
-                //We could translate this all into a array.map
+                //Create multiple graphics if for example a polygon has multiple rings.
                 let parts = []; 
                 for(let i = 0; i < x.geometry.rings.length; i++) {
                     const geometryPart = {...x.geometry};
@@ -345,8 +378,10 @@ class EllipsisVectorLayer {
         return tiles;
     };
 
-    getMapBounds = async () => {
-        await projection.load();
+    getMapBounds = () => {
+        if(!projection.isLoaded()) return undefined;
+
+
         const arcgisBounds = projection.project(this.view.extent, this.latLngNotationType);
 
         let bounds = {
@@ -356,7 +391,7 @@ class EllipsisVectorLayer {
             yMax: arcgisBounds.ymax,
         };
 
-        return { bounds: bounds, zoom: this.view.zoom };
+        return { bounds: bounds, zoom: Math.round(this.view.zoom)};
     };
 
 }
