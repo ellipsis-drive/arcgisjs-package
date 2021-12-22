@@ -1,53 +1,105 @@
-# NOTE: this package is currently in development, so this information is not relevant to this package yet.
+### Import the Ellipsis library in an arcgis-js project
 
-### Import the Ellipsis library in a mapbox-gl-js project
+You can import this package with npm, requireJS, commonJS and through script tags.
 
-```html
-<!-- Import Mapbox -->
-<link
-  href="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.css"
-  rel="stylesheet"
-/>
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.5.1/mapbox-gl.js"></script>
-<!-- Import the latest version of the ellipsis library -->
-<script src="https://github.com/ellipsis-drive-internal/mapboxgljs-package/releases/download/1.0.1/Ellipsis-Mapboxgljs-1.0.1.js"></script>
+#### npm
+```js
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import Graphic from '@arcgis/core/Graphic';
+import * as projection from '@arcgis/core/geometry/projection';
+import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+import WMSLayer from '@arcgis/core/layers/WMSLayer';
+import { EllipsisVectorLayer, EllipsisRasterLayer, EllipsisApi } from 'arcgisjs-ellipsis';
+
+//Pass the imports of this project to the layers. It's designed this way to ensure 
+//cross version compatibility.
+EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
+EllipsisVectorLayer.Graphic = Graphic;
+EllipsisVectorLayer.projection = projection;
+EllipsisVectorLayer.SpatialReference = SpatialReference;
+EllipsisRasterLayer.WMSLayer = WMSLayer;
 ```
 
-### Add an Ellipsis Drive block to a mapbox map
+#### \<script\> tag
+```html
+<header>
+    <script src='path-to-library'></script>
+</header>
+
+<script>
+    //access the library similarly to the NPM imported ones, but with the ellipsis prefix.
+    ellipsis.EllipsisVectorLayer
+    ellipsis.EllipsisRasterLayer
+    ellipsis.EllipsisApi
+
+    //Please not that you also have to pass all necessary arcgisjs imports as shown
+    //in the npm example.
+
+</script>
+```
+
+#### RequireJS
+```js
+require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection', 
+'esri/SpatialReference','esri/layers/WMSLayer', 'path/to/ellipsis/library'], 
+(GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, ellipsis) => {
+    
+    //Pass all imports..
+    ellipsis.EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
+    ellipsis.EllipsisVectorLayer.Graphic = Graphic;
+    ellipsis.EllipsisVectorLayer.projection = projection;
+    ellipsis.EllipsisVectorLayer.SpatialReference = SpatialReference;
+    ellipsis.EllipsisRasterLayer.WMSLayer = WMSLayer;
+
+    //Use the layers to easily import ellipsis drive layers!
+})
+
+
+```
+
+### Add an Ellipsis Drive block to an ArcgisJS map view
 
 #### Example
-
 ```js
-const map = L.map('map', {
-    center: [51.505, -0.09],
-    zoom: 13
+import Map from "@arcgis/core/Map";
+import MapView from "@arcgis/core/views/MapView";
+import WMSLayer from '@arcgis/core/layers/WMSLayer';
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import Graphic from '@arcgis/core/Graphic';
+import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+import config from "@arcgis/core/config";
+import apiToken from "./token";
+import * as projection from '@arcgis/core/geometry/projection';
+
+import { EllipsisVectorLayer, EllipsisRasterLayer } from 'arcgisjs-ellipsis';
+
+EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
+EllipsisVectorLayer.Graphic = Graphic;
+EllipsisVectorLayer.projection = projection;
+EllipsisVectorLayer.SpatialReference = SpatialReference;
+EllipsisRasterLayer.WMSLayer = WMSLayer;
+
+config.apiKey = apiToken;
+
+const map = new Map({
+    basemap: "arcgis-topographic", // Basemap layer service
 });
 
-// Raster layer
-Ellipsis.RasterLayer(
-    blockId,
-    captureId,
-    visualizationId,
-    maxZoom: 21,
-    {
-	//options
-        token: yourToken
-    }
-).addTo(map)
+const view = new MapView({
+    map: map,
+    center: [4.633205849096186, 52.373527706597514], // Longitude, latitude
+    zoom: 13, // Zoom level
+    container: "map", // Div element
+});
 
-// Vector layer
-Ellipsis.VectorLayer(
-    blockId,
-    layerId,
-    {
-	//options
-        maxZoom: 21,
-        token: yourToken
-    }
-).addTo(map)
+const borders = new EllipsisVectorLayer(view, '1a24a1ee-7f39-4d21-b149-88df5a3b633a','45c47c8a-035e-429a-9ace-2dff1956e8d9', {styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'});
+map.add(borders.getArcgisJsLayer(), 0);
+
+const vaccinationSites = new EllipsisVectorLayer(view, 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110', 'c8594627-c5eb-4937-992a-b7dcf7046fc1', {styleId: 'df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8'});
+map.add(vaccinationSites.getArcgisJsLayer(), 1);
 ```
 
-#### RasterLayer parameters
+#### EllipsisRasterLayer parameters
 
 | Name            | Description                            |
 | --------------- | -------------------------------------- |
@@ -57,16 +109,24 @@ Ellipsis.VectorLayer(
 | maxZoom         | maxZoomlevel of the layer. Default 21. |
 | options         | optional options object                |
 
-#### RasterLayer options
+*note* The visualizations are currently not working as this is a wrapper around a WMS service. This'll possibly still be added.
+
+#### EllipsisRasterLayer options
 
 | Name  | Description       |
 | ----- | ----------------- |
 | token | token of the user |
 
+#### EllipsisRasterLayer methods and fields
+
+1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
+2. Set `EllipsisRasterLayer.WMSLayer` to the imported WMSLayer class from the arcgisjs api before using this utility
+
 #### VectorLayer parameters
 
 | Name    | Description             |
 | ------- | ----------------------- |
+| view | view that you want to add the map to (used for events and bounds)|
 | blockId | Id of the block         |
 | layerId | Id of the layer         |
 | options | optional options object |
@@ -86,14 +146,14 @@ Ellipsis.VectorLayer(
 | maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                           |
 | maxTilesInCache    | The number of tiles to keep in cache. Default 500.                       |
 | maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
-| radius             | The radius of the points in the layer. Default 15.                       |
-| lineWidth          | The width/weight of the lines in the layer. Default 5.                   |
-| useMarkers         | Use markers instead of points. Default false.                            |
+| radius             | The radius of the points in the layer. Default 5.                       |
+| lineWidth          | The width/weight of the lines in the layer. Default 2.                   |
+| useMarkers (coming soon) | Use markers instead of points. Default false.                            |
 | loadAll            | Always load all vectors, even if not visible or far away. Default false  |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
-_onFeatureClick_ gets passed two parameters: the geojson of the clicked feature and the event.
+_onFeatureClick_ gets passed three parameters: (1) the geojson of the feature, (2) the clicked point on the layer and (3) the click event.
 
 _note_ for the style object, refer to this documentation about it: https://app.ellipsis-drive.com/developer/javascript/documentation#POST%20geometryLayers%2FaddStyle.
 
@@ -109,9 +169,14 @@ _note_ for the style object, refer to this documentation about it: https://app.e
 
 </details>
 
-#### VectorLayer styling
+#### EllipsisVectorLayer methods and fields
 
-A vectorlayer can add multiple style layers to your mapbox map. To view all added styling, call `yourVectorLayer.getLayers()`. You can also get and use the source that contains geojson with `yourVectorLayer.getSource()`.
+1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
+2. Set the following fields to their corresponding import from the arcgisjs library.
+    - `EllipsisVectorLayer.GraphicsLayer`, 
+    - `EllipsisVectorLayer.Graphic`,  
+    - `EllipsisVectorLayer.projection`, 
+    - `EllipsisVectorLayer.SpatialReference` 
 
 ### Use the EllipsisApi to login into Ellipsis Drive or view metadata of blocks
 

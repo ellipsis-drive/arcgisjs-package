@@ -1,14 +1,36 @@
-import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-import Graphic from '@arcgis/core/Graphic';
-import * as projection from '@arcgis/core/geometry/projection';
-import SpatialReference from '@arcgis/core/geometry/SpatialReference';
 import EllipsisApi from "./EllipsisApi";
-
-
 
 class EllipsisVectorLayer {
 
+    getArcgisJsLayer = () => this.graphicsLayer;
+    destroy = () => {
+        if(this.gettingVectorsInterval)
+            clearInterval(this.gettingVectorsInterval);
+    }
+
     constructor(view, blockId, layerId, options = {}) {
+
+        //Use this to make the library portable between multiple arcgisjs api versions.
+        if(!EllipsisVectorLayer.GraphicsLayer) {
+            console.error('[EllipsisVectorLayer] Please set the graphicslayer import in EllipsisVectorLayer.GraphicsLayer before using this utility.');
+            return;
+        }
+        if(!EllipsisVectorLayer.Graphic) {
+            console.error('[EllipsisVectorLayer] Please set the graphics import in EllipsisVectorLayer.Graphic before using this utility.');
+            return;
+        }
+        if(!EllipsisVectorLayer.projection) {
+            console.error('[EllipsisVectorLayer] Please set the projection import in EllipsisVectorLayer.projection before using this utility.');
+            return;
+        }
+        if(!EllipsisVectorLayer.SpatialReference) {
+            console.error('[EllipsisVectorLayer] Please set the SpatialReference class in EllipsisVectorLayer.SpatialReference before using this utility.');
+            return;
+        }
+
+        //When peers use different versions of the arcgisjs api, errors occur. Solved by just passing the imports.
+        this.graphicsLayer = new EllipsisVectorLayer.GraphicsLayer();
+
         Object.keys(EllipsisVectorLayer.defaultOptions).forEach(x => {
             if (options[x] == undefined)
                 options[x] = EllipsisVectorLayer.defaultOptions[x];
@@ -16,7 +38,6 @@ class EllipsisVectorLayer {
         Object.keys(EllipsisVectorLayer.optionModifiers).forEach(x => {
             options[x] = EllipsisVectorLayer.optionModifiers[x](options[x]);
         });
-        console.log(options);
         //Copy options to this context. TODO find out or ask if this can be harmful. TODO best to wrap everything in options object anyways.
         Object.keys(options).forEach(x => {
             //Make sure the user can't overwrite anything by accident.
@@ -37,9 +58,9 @@ class EllipsisVectorLayer {
         this.view = view;
 
         //We cannot use GeoJsonLayer because it only accepts one geometry type.
-        this.graphicsLayer = new GraphicsLayer();
+        // this.graphicsLayer = new GraphicsLayer();
 
-        this.latLngNotationType = new SpatialReference({
+        this.latLngNotationType = new EllipsisVectorLayer.SpatialReference({
             wkid: 4326
         });
 
@@ -81,12 +102,11 @@ class EllipsisVectorLayer {
                 }
             });
         }
-        projection.load().then(this.handleViewportUpdate());
+        EllipsisVectorLayer.projection.load().then(this.handleViewportUpdate());
     }
 
     handleViewportUpdate = async () => {
         const viewport = await this.getMapBounds();
-        console.log(viewport.zoom);
         if (!viewport) return;
         this.zoom = Math.max(Math.min(this.maxZoom, viewport.zoom - 2), 0);
         this.tiles = this.boundsToTiles(viewport.bounds, this.zoom);
@@ -148,7 +168,7 @@ class EllipsisVectorLayer {
                 }
             }
             //Multipolygons need to be added as seperate shapes
-            return coordinateArray.map(path => new Graphic({
+            return coordinateArray.map(path => new EllipsisVectorLayer.Graphic({
                 id: feature.properties.id,
                 symbol,
                 geometry: {
@@ -167,7 +187,7 @@ class EllipsisVectorLayer {
                     color: [r, g, b]
                 }
             }
-            return coordinateArray.map(point => new Graphic({
+            return coordinateArray.map(point => new EllipsisVectorLayer.Graphic({
                 id: feature.properties.id,
                 symbol,
                 geometry: {
@@ -183,7 +203,7 @@ class EllipsisVectorLayer {
                 color: [r, g, b, a],
                 width: this.lineWidth,
             }
-            return coordinateArray.map(path => new Graphic({
+            return coordinateArray.map(path => new EllipsisVectorLayer.Graphic({
                 id: feature.properties.id,
                 symbol,
                 geometry: {
@@ -264,27 +284,15 @@ class EllipsisVectorLayer {
 
             const pageStart = this.cache[tileId].nextPageStart;
 
-            if(pageStart) console.log('yeahhh we have a next page start');
 
             //Check if tile is not already fully loaded, and if more features may be loaded
             if (pageStart && this.cache[tileId].amount <= this.maxFeaturesPerTile && this.cache[tileId].size <= this.maxMbPerTile)
                 return { tileId: t, pageStart }
-            if(this.cache[tileId].amount > this.maxFeaturesPerTile)
-                console.log(`tile reached max features: ${this.cache[tileId].amount}/${this.maxFeaturesPerTile}`);
-            if(this.cache[tileId].size > this.maxMbPerTile)
-                console.log(`tile reached max mb: ${this.cache[tileId].size}/${this.maxMbPerTile}`);
-            if(!pageStart)
-                console.log(`no pagestart..`);
             
             return null;
         }).filter(x => x);
 
-        console.log(`There are ${this.tiles.length} tiles in the map!`);
-
-        if (tiles.length === 0) {
-            console.log('there are no tiles left to render');
-            return false;
-        }
+        if (tiles.length === 0) return false;
 
         const body = {
             mapId: this.blockId,
@@ -379,9 +387,9 @@ class EllipsisVectorLayer {
     };
 
     getMapBounds = () => {
-        if(!projection.isLoaded()) return undefined;
+        if(!EllipsisVectorLayer.projection.isLoaded()) return undefined;
 
-        const arcgisBounds = projection.project(this.view.extent, this.latLngNotationType);
+        const arcgisBounds = EllipsisVectorLayer.projection.project(this.view.extent, this.latLngNotationType);
 
         let bounds = {
             xMin: arcgisBounds.xmin,
@@ -390,9 +398,7 @@ class EllipsisVectorLayer {
             yMax: arcgisBounds.ymax,
         };
 
-        console.log(JSON.stringify(bounds));
-
-        return { bounds: bounds, zoom: Math.round(this.view.zoom)};
+        return { bounds: bounds, zoom: Math.floor(this.view.zoom/this.refreshTilesStep)*this.refreshTilesStep};
     };
 
 }
@@ -408,7 +414,8 @@ EllipsisVectorLayer.defaultOptions = {
     radius: 6,
     lineWidth: 2, //TODO also change in readme
     useMarkers: false,
-    loadAll: false
+    loadAll: false,
+    refreshTilesStep: 1,
 };
 
 EllipsisVectorLayer.optionModifiers = {
