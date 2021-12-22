@@ -178,33 +178,28 @@ _note_ for the style object, refer to this documentation about it: https://app.e
     - `EllipsisVectorLayer.projection`, 
     - `EllipsisVectorLayer.SpatialReference` 
 
-### Use the EllipsisApi to login into Ellipsis Drive or view metadata of blocks
+### Use the EllipsisApi to login or view metadata
 
 #### EllipsisApi.login description
-
 **parameters**
-| name | description |
+| name | description | 
 | -- | -- |
 | username | The username of your ellipsis-drive account |
 | password | The password of your ellipsis-drive account |
 | validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
 
 **return value**
-
 ```ts
-token: string; //token to use in other api calls
-expires: number; //expiration time in milliseconds
+token: string //token to use in other api calls
+expires: number //expiration time in milliseconds
 ```
 
-#### EllipsisApi.getMetadata description
-
+#### EllipsisApi.getInfo description
 **parameters**
-| name | description |
+| name | description | 
 | -- | -- |
-| blockId | The block or shape id of the project. |
-| includeDeleted | (Optional) Boolean whether to also return deleted items. Default false. |
-| user | (Optional) An user object which can contain a token like `user: {token: mytoken}` |
+| pathId | The id of the block, folder or layer. |
+| user | (Optional) An user object which can contain a token like `user: {token: mytoken}` | 
 
 **return value**
-
-It returns JSON, which depends on the type of map.
+It returns JSON, which depends on the type of the specified object.
