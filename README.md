@@ -100,6 +100,10 @@ map.add(borders.getArcgisJsLayer(), 0);
 
 const vaccinationSites = new EllipsisVectorLayer(view, 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110', 'c8594627-c5eb-4937-992a-b7dcf7046fc1', {styleId: 'df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8'});
 map.add(vaccinationSites.getArcgisJsLayer(), 1);
+
+const vulcano = new EllipsisRasterLayer("01104b4f-85a7-482c-9ada-11dbce171982", 0, "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1");
+map.add(vulcano.getArcgisJsLayer(), 2);
+
 ```
 
 #### EllipsisRasterLayer methods and fields
