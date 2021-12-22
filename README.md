@@ -3,6 +3,9 @@
 You can import this package with npm, requireJS, commonJS and through script tags.
 
 #### npm
+```bash
+npm install arcgisjs-ellipsis
+```
 ```js
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import Graphic from '@arcgis/core/Graphic';
@@ -23,7 +26,7 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 #### \<script\> tag
 ```html
 <header>
-    <script src='path-to-library'></script>
+    <script src='https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.0/arcgisjs-ellipsis.js'></script>
 </header>
 
 <script>
@@ -41,7 +44,7 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 #### RequireJS
 ```js
 require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection', 
-'esri/SpatialReference','esri/layers/WMSLayer', 'path/to/ellipsis/library'], 
+'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.0/arcgisjs-ellipsis.js'], 
 (GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, ellipsis) => {
     
     //Pass all imports..
