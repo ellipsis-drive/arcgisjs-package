@@ -99,6 +99,11 @@ const vaccinationSites = new EllipsisVectorLayer(view, 'e5b01bac-8c1a-4feb-98e7-
 map.add(vaccinationSites.getArcgisJsLayer(), 1);
 ```
 
+#### EllipsisRasterLayer methods and fields
+
+1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
+2. Set `EllipsisRasterLayer.WMSLayer` to the imported WMSLayer class from the arcgisjs api before using this utility
+
 #### EllipsisRasterLayer parameters
 
 | Name            | Description                            |
@@ -117,10 +122,16 @@ map.add(vaccinationSites.getArcgisJsLayer(), 1);
 | ----- | ----------------- |
 | token | token of the user |
 
-#### EllipsisRasterLayer methods and fields
+
+
+#### EllipsisVectorLayer methods and fields
 
 1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
-2. Set `EllipsisRasterLayer.WMSLayer` to the imported WMSLayer class from the arcgisjs api before using this utility
+2. Set the following fields to their corresponding import from the arcgisjs library.
+    - `EllipsisVectorLayer.GraphicsLayer`, 
+    - `EllipsisVectorLayer.Graphic`,  
+    - `EllipsisVectorLayer.projection`, 
+    - `EllipsisVectorLayer.SpatialReference` 
 
 #### VectorLayer parameters
 
@@ -169,14 +180,7 @@ _note_ for the style object, refer to this documentation about it: https://app.e
 
 </details>
 
-#### EllipsisVectorLayer methods and fields
 
-1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
-2. Set the following fields to their corresponding import from the arcgisjs library.
-    - `EllipsisVectorLayer.GraphicsLayer`, 
-    - `EllipsisVectorLayer.Graphic`,  
-    - `EllipsisVectorLayer.projection`, 
-    - `EllipsisVectorLayer.SpatialReference` 
 
 ### Use the EllipsisApi to login or view metadata
 
