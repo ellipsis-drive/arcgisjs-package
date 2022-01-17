@@ -168,4 +168,7 @@ class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
     };
 }
 
+VectorLayerUtil.EllipsisVectorLayerBase.defaultOptions.fetchInterval = 500;
+VectorLayerUtil.EllipsisVectorLayerBase.defaultOptions.pageSize = 50;
+
 export default EllipsisVectorLayer;
