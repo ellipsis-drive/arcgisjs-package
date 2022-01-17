@@ -1,15 +1,22 @@
-import { EllipsisVectorLayerBase, GeoJsonUtil } from 'ellipsis-js-util'
+import { VectorLayerUtil } from 'ellipsis-js-util'
 
-class EllipsisVectorLayer {
+class EllipsisVectorLayer extends VectorLayerUtil.EllipsisVectorLayerBase {
 
     getArcgisJsLayer = () => this.graphicsLayer;
     getEllipsisLayer = () => this.ellipsisLayer;
 
-    constructor(options = {}) {
+    loadOptions = {
+        onEachFeature: (feature) => {
+            //set RGB values in compiled style
+            if (!feature.properties || !feature.properties.compiledStyle) return;
+            const compiledStyle = feature.properties.compiledStyle;
+            compiledStyle.fillColorRGB = this.getRGB(compiledStyle.fillColor);
+            compiledStyle.borderColorRGB = this.getRGB(compiledStyle.borderColor);
+        }
+    }
 
-        this.ellipsisLayer = new EllipsisVectorLayerBase(options);
-        this.ellipsisLayer.getMapBounds = this.getMapBounds;
-        this.ellipsisLayer.updateView = this.updateView;
+    constructor(options = {}) {
+        super(options);
 
         //Use this to make the library portable between multiple arcgisjs api versions.
         if (!EllipsisVectorLayer.GraphicsLayer) {
@@ -42,33 +49,33 @@ class EllipsisVectorLayer {
         if (!view.map) return this;
         view.map.add(this.graphicsLayer, index);
 
-        if (this.ellipsisLayer.onFeatureClick) {
-            view.on("click", async (e) => {
-                const hit = await view.hitTest({ x: e.x, y: e.y });
-                if (!hit.results || !hit.results.length) return;
-                const graphicHit = hit.results.find(x => x.graphic.layer === this.graphicsLayer);
-                const graphic = graphicHit.graphic;
-                if (graphic && graphic.id) {
-                    const feature = this.ellipsisLayer.getFeatures().find(x => x.properties.id === graphic.id);
-                    this.ellipsisLayer.onFeatureClick(feature, graphicHit, e);
-                }
-            });
-        }
+        if (this.options.onFeatureClick)
+            view.on("click", this.handleClickEvent);
 
-        view.when(() => this.ellipsisLayer.update());
+        view.when(() => this.update());
 
         view.watch("stationary", (isStationary) => {
             if (isStationary)
-                this.ellipsisLayer.update();
+                this.update();
         });
 
         return this;
     }
 
-    updateView = () => {
-        const features = this.ellipsisLayer.getFeatures();
-        if (!features.length) return;
+    handleClickEvent = async (e) => {
+        const hit = await view.hitTest({ x: e.x, y: e.y });
+        if (!hit.results || !hit.results.length) return;
+        const graphicHit = hit.results.find(x => x.graphic.layer === this.graphicsLayer);
+        const graphic = graphicHit.graphic;
+        if (graphic && graphic.id) {
+            const feature = this.getFeatures().find(x => x.properties.id === graphic.id);
+            this.options.onFeatureClick(feature, graphicHit, e);
+        }
+    }
 
+    updateView = () => {
+        const features = this.getFeatures();
+        if (!features.length) return;
         this.graphicsLayer.removeAll();
         this.graphicsLayer.addMany(features.flatMap(x => this.featureToGraphics(x)));
     };
@@ -76,19 +83,19 @@ class EllipsisVectorLayer {
     featureToGraphics = (feature) => {
         const type = feature.geometry.type;
         const properties = feature.properties;
-        console.log(properties.color);
-        const color = GeoJsonUtil.parseColor(properties.color);
-        console.log(color);
+        const compiledStyle = properties.compiledStyle;
+        if (!compiledStyle)
+            console.warn(`no compiled style found on feature ${feature.id}`);
 
         const coordinateArray = type.startsWith('Multi') ? feature.geometry.coordinates : [feature.geometry.coordinates];
 
         if (type.endsWith('Polygon')) {
             const symbol = {
                 type: 'simple-fill',
-                color: [color.r, color.g, color.b, color.alpha],
+                color: [...compiledStyle.fillColorRGB, compiledStyle.fillOpacity],
                 outline: {
-                    color: [color.r, color.g, color.b],
-                    width: this.ellipsisLayer.lineWidth
+                    color: [...compiledStyle.borderColorRGB, compiledStyle.borderOpacity],
+                    width: compiledStyle.width
                 }
             }
             //Multipolygons need to be added as seperate shapes
@@ -104,11 +111,11 @@ class EllipsisVectorLayer {
         if (type.endsWith('Point')) {
             const symbol = {
                 type: 'simple-marker',
-                color: [color.a, color.g, color.b, color.alpha],
-                size: this.ellipsisLayer.radius,
+                color: [...compiledStyle.fillColorRGB, compiledStyle.fillOpacity],
+                size: compiledStyle.radius,
                 outline: {
-                    width: this.ellipsisLayer.lineWidth,
-                    color: [color.a, color.g, color.b]
+                    width: compiledStyle.width,
+                    color: [...compiledStyle.borderColorRGB, compiledStyle.borderOpacity]
                 }
             }
             return coordinateArray.map(point => new EllipsisVectorLayer.Graphic({
@@ -124,8 +131,8 @@ class EllipsisVectorLayer {
         if (type.endsWith('Line')) {
             const symbol = {
                 type: 'simple-line',
-                color: [color.a, color.g, color.b, color.alpha],
-                width: this.ellipsisLayer.lineWidth,
+                color: [...compiledStyle.borderColorRGB, 1 - compiledStyle.borderOpacity],
+                width: compiledStyle.width,
             }
             return coordinateArray.map(path => new EllipsisVectorLayer.Graphic({
                 id: feature.properties.id,
@@ -136,7 +143,17 @@ class EllipsisVectorLayer {
                 }
             }));
         }
+    };
+
+    getRGB = (color) => {
+        if (!color || color.length < 7) return [];
+        const r = parseInt(color.substr(1, 2), 16);
+        const g = parseInt(color.substr(3, 2), 16);
+        const b = parseInt(color.substr(5, 2), 16);
+        return [r, g, b];
     }
+
+
 
     getMapBounds = () => {
         const arcgisBounds = EllipsisVectorLayer.projection.project(this.view.extent, this.spatialReference);

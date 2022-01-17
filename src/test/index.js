@@ -35,7 +35,6 @@ const borders = new EllipsisVectorLayer({
     styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
 }).addTo(view);
 
-
 const vaccinationSites = new EllipsisVectorLayer({
     blockId: 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110',
     layerId: 'c8594627-c5eb-4937-992a-b7dcf7046fc1',
