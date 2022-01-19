@@ -1,5 +1,7 @@
-import EllipsisApi from "./EllipsisApi";
 import EllipsisRasterLayer from "./EllipsisRasterLayer";
 import EllipsisVectorLayer from "./EllipsisVectorLayer";
+import getEllipsisUtilObject from "./getEllipsisUtilObject";
 
-export {EllipsisVectorLayer, EllipsisRasterLayer, EllipsisApi};
+const EllipsisApi = getEllipsisUtilObject('EllipsisApi');
+
+export { EllipsisVectorLayer, EllipsisRasterLayer, EllipsisApi };

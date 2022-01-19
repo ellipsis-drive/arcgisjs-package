@@ -8,7 +8,7 @@ import SpatialReference from '@arcgis/core/geometry/SpatialReference';
 import apiToken from "./token";
 import Graphic from '@arcgis/core/Graphic';
 
-import {EllipsisRasterLayer, EllipsisVectorLayer, EllipsisApi} from '../lib';
+import { EllipsisRasterLayer, EllipsisVectorLayer, EllipsisApi } from '../lib';
 
 
 config.apiKey = apiToken;
@@ -29,7 +29,14 @@ EllipsisVectorLayer.Graphic = Graphic;
 EllipsisVectorLayer.projection = projection;
 EllipsisVectorLayer.SpatialReference = SpatialReference;
 
-const layer = new EllipsisVectorLayer(view, '1a24a1ee-7f39-4d21-b149-88df5a3b633a','45c47c8a-035e-429a-9ace-2dff1956e8d9', {styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'}).getArcgisJsLayer();
-map.add(layer,1);
-const vaccinationSites = new EllipsisVectorLayer(view, 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110', 'c8594627-c5eb-4937-992a-b7dcf7046fc1', {styleId: 'df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8'}).getArcgisJsLayer();
-map.add(vaccinationSites, 2);
+const borders = new EllipsisVectorLayer({
+    blockId: '1a24a1ee-7f39-4d21-b149-88df5a3b633a',
+    layerId: '45c47c8a-035e-429a-9ace-2dff1956e8d9',
+    styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'
+}).addTo(view);
+
+const vaccinationSites = new EllipsisVectorLayer({
+    blockId: 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110',
+    layerId: 'c8594627-c5eb-4937-992a-b7dcf7046fc1',
+    styleId: 'df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8'
+}).addTo(view);

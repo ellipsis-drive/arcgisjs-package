@@ -1,4 +1,7 @@
-import EllipsisApi from "./EllipsisApi";
+import getEllipsisUtilObject from './getEllipsisUtilObject';
+
+const EllipsisApi = getEllipsisUtilObject('EllipsisApi');
+
 
 //TODO handle captureId and visualizationId.
 
@@ -7,18 +10,21 @@ class EllipsisRasterLayer {
 
     getArcgisJsLayer = () => this.wmsLayer;
 
-    constructor(blockId, captureId, visualizationId, options = {}) {
+    constructor(options = {}) {
 
-        if(!EllipsisRasterLayer.WMSLayer) {
+        if (!EllipsisRasterLayer.WMSLayer) {
             console.error('Please set the wmsLayer import in EllipsisVectorLayer.WMSLayer before using this utility.');
             return;
         }
+
+        if (options.visualization || options.visualizationId !== undefined)
+            console.warn('visualizations are currently not supported');
 
         const token = options.token;
         const getTokenUrlExtension = () => {
             return token ? `?token=${token}` : '';
         }
-        const url = `${EllipsisApi.getApiUrl()}/wms/${blockId}${getTokenUrlExtension(token)}`;
+        const url = `${EllipsisApi.getApiUrl()}/wms/${options.blockId}${getTokenUrlExtension(options.token)}`;
 
         this.wmsLayer = new EllipsisRasterLayer.WMSLayer({ url });
     }
