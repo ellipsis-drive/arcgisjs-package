@@ -1,4 +1,6 @@
-import { EllipsisApi } from 'ellipsis-js-util';
+import getEllipsisUtilObject from './getEllipsisUtilObject';
+
+const EllipsisApi = getEllipsisUtilObject('EllipsisApi');
 
 
 //TODO handle captureId and visualizationId.
