@@ -3,18 +3,24 @@
 You can import this package with npm, requireJS, commonJS and through script tags.
 
 #### npm
+
 ```bash
 npm install arcgisjs-ellipsis
 ```
-```js
-import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-import Graphic from '@arcgis/core/Graphic';
-import * as projection from '@arcgis/core/geometry/projection';
-import SpatialReference from '@arcgis/core/geometry/SpatialReference';
-import WMSLayer from '@arcgis/core/layers/WMSLayer';
-import { EllipsisVectorLayer, EllipsisRasterLayer, EllipsisApi } from 'arcgisjs-ellipsis';
 
-//Pass the imports of this project to the layers. It's designed this way to ensure 
+```js
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+import Graphic from "@arcgis/core/Graphic";
+import * as projection from "@arcgis/core/geometry/projection";
+import SpatialReference from "@arcgis/core/geometry/SpatialReference";
+import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import {
+  EllipsisVectorLayer,
+  EllipsisRasterLayer,
+  EllipsisApi,
+} from "arcgisjs-ellipsis";
+
+//Pass the imports of this project to the layers. It's designed this way to ensure
 //cross version compatibility.
 EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
 EllipsisVectorLayer.Graphic = Graphic;
@@ -24,35 +30,39 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 ```
 
 #### \<script\> tag
+
 ```html
 <header>
-    <script src='https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.0/arcgisjs-ellipsis.js'></script>
+  <script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js"></script>
+  <script src="https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.1/arcgisjs-ellipsis-1.0.1.js"></script>
 </header>
 
 <script>
-    //access the library similarly to the NPM imported ones, but with the ellipsis prefix.
-    ellipsis.EllipsisVectorLayer
-    ellipsis.EllipsisRasterLayer
-    ellipsis.EllipsisApi
+  //access the library similarly to the NPM imported ones, but with the ellipsis prefix.
+  arcgisjsEllipsis.EllipsisVectorLayer;
+  arcgisjsEllipsis.EllipsisRasterLayer;
+  arcgisjsEllipsis.EllipsisApi;
 
-    //Please not that you also have to pass all necessary arcgisjs imports as shown
-    //in the npm example.
-
+  //Please not that you also have to pass all necessary arcgisjs imports as shown
+  //in the npm example.
 </script>
 ```
 
 #### RequireJS
+
 ```js
-require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection', 
-'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.0/arcgisjs-ellipsis.js'], 
-(GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, ellipsis) => {
-    
+require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
+'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js','https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.1/arcgisjs-ellipsis-1.0.1.js'],
+(GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, EllipsisUtil, arcgisjsEllipsis) => {
+
+    window.EllipsisUtil = EllipsisUtil;
+
     //Pass all imports..
-    ellipsis.EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
-    ellipsis.EllipsisVectorLayer.Graphic = Graphic;
-    ellipsis.EllipsisVectorLayer.projection = projection;
-    ellipsis.EllipsisVectorLayer.SpatialReference = SpatialReference;
-    ellipsis.EllipsisRasterLayer.WMSLayer = WMSLayer;
+    arcgisjsEllipsis.EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
+    arcgisjsEllipsis.EllipsisVectorLayer.Graphic = Graphic;
+    arcgisjsEllipsis.EllipsisVectorLayer.projection = projection;
+    arcgisjsEllipsis.EllipsisVectorLayer.SpatialReference = SpatialReference;
+    arcgisjsEllipsis.EllipsisRasterLayer.WMSLayer = WMSLayer;
 
     //Use the layers to easily import ellipsis drive layers!
 })
@@ -63,18 +73,19 @@ require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
 ### Add an Ellipsis Drive block to an ArcgisJS map view
 
 #### Example
+
 ```js
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
-import WMSLayer from '@arcgis/core/layers/WMSLayer';
-import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-import Graphic from '@arcgis/core/Graphic';
-import SpatialReference from '@arcgis/core/geometry/SpatialReference';
+import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+import Graphic from "@arcgis/core/Graphic";
+import SpatialReference from "@arcgis/core/geometry/SpatialReference";
 import config from "@arcgis/core/config";
 import apiToken from "./token";
-import * as projection from '@arcgis/core/geometry/projection';
+import * as projection from "@arcgis/core/geometry/projection";
 
-import { EllipsisVectorLayer, EllipsisRasterLayer } from 'arcgisjs-ellipsis';
+import { EllipsisVectorLayer, EllipsisRasterLayer } from "arcgisjs-ellipsis";
 
 EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
 EllipsisVectorLayer.Graphic = Graphic;
@@ -85,25 +96,36 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 config.apiKey = apiToken;
 
 const map = new Map({
-    basemap: "arcgis-topographic", // Basemap layer service
+  basemap: "arcgis-topographic", // Basemap layer service
 });
 
 const view = new MapView({
-    map: map,
-    center: [4.633205849096186, 52.373527706597514], // Longitude, latitude
-    zoom: 13, // Zoom level
-    container: "map", // Div element
+  map: map,
+  center: [4.633205849096186, 52.373527706597514], // Longitude, latitude
+  zoom: 13, // Zoom level
+  container: "map", // Div element
 });
 
-const borders = new EllipsisVectorLayer(view, '1a24a1ee-7f39-4d21-b149-88df5a3b633a','45c47c8a-035e-429a-9ace-2dff1956e8d9', {styleId: 'a30d5d0e-26a3-43a7-9d23-638cef7600c4'});
-map.add(borders.getArcgisJsLayer(), 0);
+const borders = new EllipsisVectorLayer({
+  blockId: "1a24a1ee-7f39-4d21-b149-88df5a3b633a",
+  layerId: "45c47c8a-035e-429a-9ace-2dff1956e8d9",
+  styleId: "a30d5d0e-26a3-43a7-9d23-638cef7600c4"
+});
+borders.addTo(map);
 
-const vaccinationSites = new EllipsisVectorLayer(view, 'e5b01bac-8c1a-4feb-98e7-c2ff751ef110', 'c8594627-c5eb-4937-992a-b7dcf7046fc1', {styleId: 'df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8'});
-map.add(vaccinationSites.getArcgisJsLayer(), 1);
+const vaccinationSites = new EllipsisVectorLayer({
+  blockId: "e5b01bac-8c1a-4feb-98e7-c2ff751ef110",
+  layerId: "c8594627-c5eb-4937-992a-b7dcf7046fc1",
+  styleId: "df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8"
+});
+vaccinationSites.addTo(map);
 
-const vulcano = new EllipsisRasterLayer("01104b4f-85a7-482c-9ada-11dbce171982", 0, "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1");
+const vulcano = new EllipsisRasterLayer(
+  blockId: "01104b4f-85a7-482c-9ada-11dbce171982",
+  captureId: 0,
+  visualizationId: "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
+);
 map.add(vulcano.getArcgisJsLayer(), 2);
-
 ```
 
 #### EllipsisRasterLayer methods and fields
@@ -111,7 +133,7 @@ map.add(vulcano.getArcgisJsLayer(), 2);
 1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
 2. Set `EllipsisRasterLayer.WMSLayer` to the imported WMSLayer class from the arcgisjs api before using this utility
 
-#### EllipsisRasterLayer parameters
+#### EllipsisRasterLayer options
 
 | Name            | Description                            |
 | --------------- | -------------------------------------- |
@@ -119,55 +141,41 @@ map.add(vulcano.getArcgisJsLayer(), 2);
 | captureId       | id of the capture                      |
 | visualizationId | id of the layer                        |
 | maxZoom         | maxZoomlevel of the layer. Default 21. |
-| options         | optional options object                |
+| token           | token of the user                      |
 
-*note* The visualizations are currently not working as this is a wrapper around a WMS service. This'll possibly still be added.
-
-#### EllipsisRasterLayer options
-
-| Name  | Description       |
-| ----- | ----------------- |
-| token | token of the user |
-
-
+_note_ The visualizations are currently not working as this is a wrapper around a WMS service. This'll possibly still be added.
 
 #### EllipsisVectorLayer methods and fields
 
 1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
 2. Set the following fields to their corresponding import from the arcgisjs library.
-    - `EllipsisVectorLayer.GraphicsLayer`, 
-    - `EllipsisVectorLayer.Graphic`,  
-    - `EllipsisVectorLayer.projection`, 
-    - `EllipsisVectorLayer.SpatialReference` 
-
-#### VectorLayer parameters
-
-| Name    | Description             |
-| ------- | ----------------------- |
-| view | view that you want to add the map to (used for events and bounds)|
-| blockId | Id of the block         |
-| layerId | Id of the layer         |
-| options | optional options object |
+   - `EllipsisVectorLayer.GraphicsLayer`,
+   - `EllipsisVectorLayer.Graphic`,
+   - `EllipsisVectorLayer.projection`,
+   - `EllipsisVectorLayer.SpatialReference`
 
 #### VectorLayer options
 
-| Name               | Description                                                              |
-| ------------------ | ------------------------------------------------------------------------ |
-| onFeatureClick     | A function to run on feature click, with as argument the clicked feature |
-| token              | Token of the user                                                        |
-| styleId            | Id of the layer style                                                    |
-| style              | Style object\*                                                           |
-| filter             | A property filter to use                                                 |
-| maxZoom            | maxZoomlevel of the layer. Default 21.                                   |
-| centerPoints       | Boolean whether to render only center points. Default false.             |
-| pageSize           | Size to retreive per step. Default 25, max 3000.                         |
-| maxMbPerTile       | The maximum mb to load per tile. Default 16mb.                           |
-| maxTilesInCache    | The number of tiles to keep in cache. Default 500.                       |
-| maxFeaturesPerTile | The maximum number of features to load per tile. Default 200.            |
-| radius             | The radius of the points in the layer. Default 5.                       |
-| lineWidth          | The width/weight of the lines in the layer. Default 2.                   |
+| Name                     | Description                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| view                     | view that you want to add the map to (used for events and bounds)        |
+| blockId                  | Id of the block                                                          |
+| layerId                  | Id of the layer                                                          |
+| onFeatureClick           | A function to run on feature click, with as argument the clicked feature |
+| token                    | Token of the user                                                        |
+| styleId                  | Id of the layer style                                                    |
+| style                    | Style object\*                                                           |
+| filter                   | A property filter to use                                                 |
+| maxZoom                  | maxZoomlevel of the layer. Default 21.                                   |
+| centerPoints             | Boolean whether to render only center points. Default false.             |
+| pageSize                 | Size to retreive per step. Default 25, max 3000.                         |
+| maxMbPerTile             | The maximum mb to load per tile. Default 16mb.                           |
+| maxTilesInCache          | The number of tiles to keep in cache. Default 500.                       |
+| maxFeaturesPerTile       | The maximum number of features to load per tile. Default 200.            |
+| radius                   | The radius of the points in the layer. Default 5.                        |
+| lineWidth                | The width/weight of the lines in the layer. Default 2.                   |
 | useMarkers (coming soon) | Use markers instead of points. Default false.                            |
-| loadAll            | Always load all vectors, even if not visible or far away. Default false  |
+| loadAll                  | Always load all vectors, even if not visible or far away. Default false  |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
@@ -187,30 +195,31 @@ _note_ for the style object, refer to this documentation about it: https://app.e
 
 </details>
 
-
-
 ### Use the EllipsisApi to login or view metadata
 
 #### EllipsisApi.login description
+
 **parameters**
-| name | description | 
+| name | description |
 | -- | -- |
 | username | The username of your ellipsis-drive account |
 | password | The password of your ellipsis-drive account |
 | validFor | (Optional) The number of second the access token will be valid for. Default 86400 (24 hours). |
 
 **return value**
+
 ```ts
-token: string //token to use in other api calls
-expires: number //expiration time in milliseconds
+token: string; //token to use in other api calls
+expires: number; //expiration time in milliseconds
 ```
 
 #### EllipsisApi.getInfo description
+
 **parameters**
-| name | description | 
+| name | description |
 | -- | -- |
 | pathId | The id of the block, folder or layer. |
-| user | (Optional) An user object which can contain a token like `user: {token: mytoken}` | 
+| user | (Optional) An user object which can contain a token like `user: {token: mytoken}` |
 
 **return value**
 It returns JSON, which depends on the type of the specified object.
