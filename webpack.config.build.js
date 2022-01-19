@@ -6,7 +6,7 @@ module.exports = {
     publicPath: '',
     path: path.resolve(__dirname, 'build'),
     library: {
-      name: 'ellipsis',
+      name: 'arcgisjsEllipsis',
       type: 'umd'
     },
     filename: 'arcgisjs-ellipsis.js',
