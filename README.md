@@ -172,10 +172,9 @@ _note_ The visualizations are currently not working as this is a wrapper around 
 | maxMbPerTile             | The maximum mb to load per tile. Default 16mb.                           |
 | maxTilesInCache          | The number of tiles to keep in cache. Default 500.                       |
 | maxFeaturesPerTile       | The maximum number of features to load per tile. Default 200.            |
-| radius                   | The radius of the points in the layer. Default 5.                        |
-| lineWidth                | The width/weight of the lines in the layer. Default 2.                   |
 | useMarkers (coming soon) | Use markers instead of points. Default false.                            |
 | loadAll                  | Always load all vectors, even if not visible or far away. Default false  |
+| fetchInterval            | The interval in ms between starting and finishing a request. Default 0   |
 
 _warning_ `loadAll=true` will ignore maxMbPerTile, maxTilesInCache and maxFeaturesPerTile settings.
 
