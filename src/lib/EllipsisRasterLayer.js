@@ -24,7 +24,7 @@ class EllipsisRasterLayer {
         const getTokenUrlExtension = () => {
             return token ? `?token=${token}` : '';
         }
-        const url = `${EllipsisApi.getApiUrl()}/wms/${options.blockId}${getTokenUrlExtension(options.token)}`;
+        const url = `${EllipsisApi.getApiUrl()}/ogc/wms/${options.pathId ?? options.blockId}${getTokenUrlExtension(options.token)}`;
 
         this.wmsLayer = new EllipsisRasterLayer.WMSLayer({ url });
     }
