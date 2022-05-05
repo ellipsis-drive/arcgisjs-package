@@ -33,6 +33,6 @@
     "@arcgis/core": "4.x"
   },
   "dependencies": {
-    "ellipsis-js-util": "^1.0.1"
+    "ellipsis-js-util": "^1.1.0"
   }
 }

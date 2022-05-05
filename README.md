@@ -33,8 +33,8 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 
 ```html
 <header>
-  <script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js"></script>
-  <script src="https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.1/arcgisjs-ellipsis-1.0.1.js"></script>
+  <script src="https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js"></script>
+  <script src="https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.1.0/arcgisjs-ellipsis-1.1.0.js"></script>
 </header>
 
 <script>
@@ -52,7 +52,7 @@ EllipsisRasterLayer.WMSLayer = WMSLayer;
 
 ```js
 require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
-'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.0.1/ellipsis-js-util-1.0.1.js','https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.0.1/arcgisjs-ellipsis-1.0.1.js'],
+'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js','https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.1.0/arcgisjs-ellipsis-1.1.0.js'],
 (GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, EllipsisUtil, arcgisjsEllipsis) => {
 
     window.EllipsisUtil = EllipsisUtil;
