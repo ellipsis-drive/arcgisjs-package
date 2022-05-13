@@ -1,6 +1,6 @@
 {
   "name": "arcgisjs-ellipsis",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Use Ellipsis Drive layers in arcgisjs projects.",
   "private": false,
   "keywords": [
