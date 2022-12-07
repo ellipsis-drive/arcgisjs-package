@@ -108,22 +108,22 @@ const view = new MapView({
 
 const borders = new EllipsisVectorLayer({
   pathId: "1a24a1ee-7f39-4d21-b149-88df5a3b633a",
-  layerId: "45c47c8a-035e-429a-9ace-2dff1956e8d9",
-  styleId: "a30d5d0e-26a3-43a7-9d23-638cef7600c4"
+  timestampId: "45c47c8a-035e-429a-9ace-2dff1956e8d9",
+  style: "a30d5d0e-26a3-43a7-9d23-638cef7600c4"
 });
 borders.addTo(map);
 
 const vaccinationSites = new EllipsisVectorLayer({
   pathId: "e5b01bac-8c1a-4feb-98e7-c2ff751ef110",
-  layerId: "c8594627-c5eb-4937-992a-b7dcf7046fc1",
-  styleId: "df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8"
+  timestampId: "c8594627-c5eb-4937-992a-b7dcf7046fc1",
+  style: "df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8"
 });
 vaccinationSites.addTo(map);
 
 const vulcano = new EllipsisRasterLayer(
   pathId: "01104b4f-85a7-482c-9ada-11dbce171982",
   timestampId: 0,
-  layer: "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
+  style: "01f63a0d-3f92-42d3-925d-b3bfaf6dd6a1"
 );
 map.add(vulcano.getArcgisJsLayer(), 2);
 ```
@@ -139,7 +139,7 @@ map.add(vulcano.getArcgisJsLayer(), 2);
 | ----------- | ------------------------------------------ |
 | pathId      | id of the path                             |
 | timestampId | id of the timestamp                        |
-| layer       | id of the layer or an object describing it |
+| style      | id of the style or an object describing it |
 | maxZoom     | maxZoomlevel of the layer. Default 21.     |
 | token       | token of the user                          |
 
@@ -160,11 +160,10 @@ _note_ The visualizations are currently not working as this is a wrapper around 
 | ------------------------ | ------------------------------------------------------------------------ |
 | view                     | view that you want to add the map to (used for events and bounds)        |
 | pathId                   | Id of the path                                                           |
-| layerId                  | Id of the layer                                                          |
+| timestampId                  | Id of the timestamp                                                          |
+| style      | id of the style or an object describing it |
 | onFeatureClick           | A function to run on feature click, with as argument the clicked feature |
 | token                    | Token of the user                                                        |
-| styleId                  | Id of the layer style                                                    |
-| style                    | Style object\*                                                           |
 | filter                   | A property filter to use                                                 |
 | maxZoom                  | maxZoomlevel of the layer. Default 21.                                   |
 | centerPoints             | Boolean whether to render only center points. Default false.             |
