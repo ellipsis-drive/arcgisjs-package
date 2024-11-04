@@ -111,14 +111,14 @@ const borders = new EllipsisVectorLayer({
   timestampId: "45c47c8a-035e-429a-9ace-2dff1956e8d9",
   style: "a30d5d0e-26a3-43a7-9d23-638cef7600c4"
 });
-borders.addTo(view, 1);
+map.add(borders.getArcgisJsLayer(view), 1);
 
 const vaccinationSites = new EllipsisVectorLayer({
   pathId: "e5b01bac-8c1a-4feb-98e7-c2ff751ef110",
   timestampId: "c8594627-c5eb-4937-992a-b7dcf7046fc1",
   style: "df7522fe-e8eb-4393-80c5-2d5c6d0ea1a8"
 });
-vaccinationSites.addTo(view, 2);
+map.add(vulcano.getArcgisJsLayer(view), 2);
 
 const vulcano = new EllipsisRasterLayer(
   pathId: "01104b4f-85a7-482c-9ada-11dbce171982",
@@ -147,7 +147,7 @@ _note_ The visualizations are currently not working as this is a wrapper around 
 
 #### EllipsisVectorLayer methods and fields
 
-1. Call `addTo()` with view and index as parameters to add the layer to the map.
+1. Call `getArcgisjsLayer(view)` to get the arcgisjs layer that is generated.
 2. Set the following fields to their corresponding import from the arcgisjs library.
    - `EllipsisVectorLayer.GraphicsLayer`,
    - `EllipsisVectorLayer.Graphic`,
