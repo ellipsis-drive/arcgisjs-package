@@ -52,8 +52,8 @@ EllipsisRasterLayer.WebTileLayer = WebTileLayer;
 
 ```js
 require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
-'esri/SpatialReference','esri/layers/WMSLayer', 'https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js','https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.1.0/arcgisjs-ellipsis-1.1.0.js'],
-(GraphicsLayer, Graphic, projection, SpatialReference, WMSLayer, EllipsisUtil, arcgisjsEllipsis) => {
+'esri/SpatialReference','esri/layers/WebTileLayer', 'https://github.com/ellipsis-drive/ellipsis-js-util/releases/download/1.1.0/ellipsis-js-util-1.1.0.js','https://github.com/ellipsis-drive/arcgisjs-package/releases/download/1.1.0/arcgisjs-ellipsis-1.1.0.js'],
+(GraphicsLayer, Graphic, projection, SpatialReference, WebTilLayer, EllipsisUtil, arcgisjsEllipsis) => {
 
     window.EllipsisUtil = EllipsisUtil;
 
@@ -77,7 +77,7 @@ require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
 ```js
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
-import WMSLayer from "@arcgis/core/layers/WebTileLayer";
+import WebTileLayer from "@arcgis/core/layers/WebTileLayer";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
@@ -143,7 +143,6 @@ map.add(vulcano.getArcgisJsLayer(), 3);
 | maxZoom     | maxZoomlevel of the layer. Default 21.     |
 | token       | token of the user                          |
 
-_note_ The visualizations are currently not working as this is a wrapper around a WMS service. This'll possibly still be added.
 
 #### EllipsisVectorLayer methods and fields
 
