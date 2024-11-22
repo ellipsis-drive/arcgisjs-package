@@ -13,7 +13,7 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 import * as projection from "@arcgis/core/geometry/projection";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
-import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import WebTileLayer from "@arcgis/core/layers/WebTileLayer.js";
 import {
   EllipsisVectorLayer,
   EllipsisRasterLayer,
@@ -26,7 +26,7 @@ EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
 EllipsisVectorLayer.Graphic = Graphic;
 EllipsisVectorLayer.projection = projection;
 EllipsisVectorLayer.SpatialReference = SpatialReference;
-EllipsisRasterLayer.WMSLayer = WMSLayer;
+EllipsisRasterLayer.WebTileLayer = WebTileLayer;
 ```
 
 #### \<script\> tag
@@ -62,7 +62,7 @@ require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
     arcgisjsEllipsis.EllipsisVectorLayer.Graphic = Graphic;
     arcgisjsEllipsis.EllipsisVectorLayer.projection = projection;
     arcgisjsEllipsis.EllipsisVectorLayer.SpatialReference = SpatialReference;
-    arcgisjsEllipsis.EllipsisRasterLayer.WMSLayer = WMSLayer;
+    arcgisjsEllipsis.EllipsisRasterLayer.WebTileLayer = WebTileLayer;
 
     //Use the layers to easily import ellipsis drive layers!
 })
@@ -77,7 +77,7 @@ require([['esri/layers/GraphicsLayer', 'esri/Graphic', 'esri/projection',
 ```js
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
-import WMSLayer from "@arcgis/core/layers/WMSLayer";
+import WMSLayer from "@arcgis/core/layers/WebTileLayer";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import Graphic from "@arcgis/core/Graphic";
 import SpatialReference from "@arcgis/core/geometry/SpatialReference";
@@ -91,7 +91,7 @@ EllipsisVectorLayer.GraphicsLayer = GraphicsLayer;
 EllipsisVectorLayer.Graphic = Graphic;
 EllipsisVectorLayer.projection = projection;
 EllipsisVectorLayer.SpatialReference = SpatialReference;
-EllipsisRasterLayer.WMSLayer = WMSLayer;
+EllipsisRasterLayer.WebTileLayer = WebTileLayer;
 
 config.apiKey = apiToken;
 
@@ -131,7 +131,7 @@ map.add(vulcano.getArcgisJsLayer(), 3);
 #### EllipsisRasterLayer methods and fields
 
 1. Call `getArcgisjsLayer()` to get the arcgisjs layer that is generated
-2. Set `EllipsisRasterLayer.WMSLayer` to the imported WMSLayer class from the arcgisjs api before using this utility
+2. Set `EllipsisRasterLayer.WebTileLayer` to the imported WebTileLayer class from the arcgisjs api before using this utility
 
 #### EllipsisRasterLayer options
 
